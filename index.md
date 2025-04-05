@@ -1,8 +1,6 @@
 ---
-title: Welcome to the Homelab Horizon
+title: Welcome to the Homelab Horizon!
 ---
-
-# Welcome to the Homelab Horizon!
 
 Hey fellow tinkerers, builders, and digital explorers!
 
