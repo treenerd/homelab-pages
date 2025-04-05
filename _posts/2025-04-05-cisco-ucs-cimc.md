@@ -1,5 +1,5 @@
 ---
-title: "Reviving a Relic: Conquering the 2024 Cisco UCS Upgrade"
+title: "Reviving a Relic: Conquering the 2025 Cisco UCS Upgrade"
 date: 2025-04-05
 ---
 
