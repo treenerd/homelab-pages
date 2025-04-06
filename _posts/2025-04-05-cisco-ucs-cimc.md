@@ -161,7 +161,6 @@ Before you can connect vKVM again, clear the javaws cache
 ```
 javaws -clearcache
 javaws -uninstall
-
 ```
 
 ## C220 M4
