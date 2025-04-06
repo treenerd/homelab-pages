@@ -163,6 +163,20 @@ javaws -clearcache
 javaws -uninstall
 ```
 
+Just it is said, even with CIMC version 3 Flash is needed. Ruffle didn't work yet, because Actionscript 3 is not supported.
+But with the good old friend ssh we can access CIMC and it also feels better than a web interface.
+At least for a Linux guy like myself.
+
+```
+ssh admin@<CIMC-IP>
+homelab-001-cimc# show version
+Firmware Version
+--------------------
+3.0(4r)
+```
+
+
+
 ## C220 M4
 
 
