@@ -144,14 +144,24 @@ So check for secureboot in boot settings before you start with the upgrades, and
 
 Lets start with the upgrades:
 In my case I started with CIMC version 2.0(13e)
-Release notes state to upgrade to 3.0(3a)
-DOwnloaded ucs-c2x-huu-3.0.3a.iso and mapped it via KVM to the server.
+
+### version 3.0(3a)
+Release notes state to upgrade to 3.0(3a) from 2.0
+Download ucs-c2x-huu-3.0.3a.iso and mapped it via KVM to the server.
 Reboot
 Press F6 and choose Cico vKVM-Mapped vDVD1.22 to boot from to start Cisco UCS Host Upgrade Utility
 During the upgrade wizard it will ask you again if you want to enable Secure Boot.
 Be aware of that, because it is not possible to change this afterwards.
 Read the messages and then do ClickOPS.
 
+###  version 3.0(4r)
+
+Latest release ucs-c2x-huu-3.0.4r.iso
+Before you can connect vKVM again, clear the javaws cache
+```
+javaws -clearcache
+javaws -uninstall
+```
 
 ## C220 M4
 
