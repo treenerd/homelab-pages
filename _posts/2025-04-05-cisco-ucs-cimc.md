@@ -40,6 +40,7 @@ Well let's check the related Release notes of the UCS Rack Server Software.
 In case of UCS C220 M4 the lates release at time of writing was [4.1(2)](https://www.cisco.com/c/en/us/td/docs/unified_computing/ucs/release/notes/b_release-notes-for-cisco-ucs-rack-server-software-release-4_1_2.html#reference_ikd_w5t_zjb) .
 In case of UCS C220 M3 [3.0(4)](https://www.cisco.com/c/en/us/td/docs/unified_computing/ucs/release/notes/b_UCS_C-Series_Release_Notes_3_0_4.html)
 In case of UCS C22 M3 [3.0(4r)](https://www.cisco.com/c/en/us/td/docs/unified_computing/ucs/release/notes/b_UCS_C-Series_Release_Notes_3_0_4.html)
+=======
 
 So in case of C220 M4 with CIMC version 2.0.2, the suggested upgrade path was 3.0(3a) to 4.1(2a) .  
 The upgrades worked, but to install them was not as easy as expected.
@@ -68,6 +69,20 @@ curl -o kvm.jnlp -k https://<cimc_ip>/kvm.jnlp?cimcAddr=<cimc_ip>\&tkn1=admin\&t
 ```
 So far so good.
 But now we need some compatible java version.
+=======
+Well, I had CDROM drives at the past. But in 2025? Nope not working anymore.
+
+### Do I really need to access Flash?
+
+Nope I do not have to access the Adobe Flash interface. There is a workaround, which I found in the Cisco Community Forum.
+Just the JLNP file is needed to start the java web application.
+
+```bash
+https://<cimc_ip>/kvm.jnlp?cimcAddr=<cimc_ip>&tkn1=admin&tkn2=<password>
+
+```
+So far so good.
+But now we need the java. Openjdk-8 and icedtea didn't work in my case.
 
 #### Which java to use?
 
