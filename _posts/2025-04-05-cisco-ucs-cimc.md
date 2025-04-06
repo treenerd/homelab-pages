@@ -38,6 +38,8 @@ The Cisco Integrated Management Controller (CIMC) is a dedicated management proc
 Where to start the upgrade journey?  
 Well let's check the related Release notes of the UCS Rack Server Software.  
 In case of UCS C220 M4 the lates release at time of writing was [4.1(2)](https://www.cisco.com/c/en/us/td/docs/unified_computing/ucs/release/notes/b_release-notes-for-cisco-ucs-rack-server-software-release-4_1_2.html#reference_ikd_w5t_zjb) .
+In case of UCS C220 M3 [3.0(4)](https://www.cisco.com/c/en/us/td/docs/unified_computing/ucs/release/notes/b_UCS_C-Series_Release_Notes_3_0_4.html)
+In case of UCS C22 M3 [3.0(4r)](https://www.cisco.com/c/en/us/td/docs/unified_computing/ucs/release/notes/b_UCS_C-Series_Release_Notes_3_0_4.html)
 
 So in case of C220 M4 with CIMC version 2.0.2, the suggested upgrade path was 3.0(3a) to 4.1(2a) .  
 The upgrades worked, but to install them was not as easy as expected.
@@ -53,19 +55,19 @@ My first thoughts where. Just use an USB stick, copy the ISO, plug it in and let
 Well, I recognized that it was not a common thing to use usb flash drives for this task back in 2013.
 It seems Admins had to burn CD's and use CDROM drives to let the server boot into huu iso images, when it was not possible to access the out of band management.
 
-Well, I had CDROM drives at the past. But in 2025? Nope not working anymore.
+Well ... Back in time I had CDROM drives at the past, but now we have 2025..
 
 ### Do I really need to access Flash?
 
-Nope I do not have to access the Adobe Flash interface. There is a workaround, which I found in the Cisco Community Forum.
-Just the JLNP file is needed to start the java web application.
-
+I do not have to access the Adobe Flash interface to access vKVM. There is a workaround, which I found in the Cisco Community Forum.
+Just the JNLP file is needed to start the java web application. Our goal is to update CIMC, not to change settings.
+There is a workaround:
 ```bash
-https://<cimc_ip>/kvm.jnlp?cimcAddr=<cimc_ip>&tkn1=admin&tkn2=<password>
+curl -o kvm.jnlp -k https://<cimc_ip>/kvm.jnlp?cimcAddr=<cimc_ip>\&tkn1=admin\&tkn2=<password>
 
 ```
 So far so good.
-But now we need the java. Openjdk-8 and icedtea didn't work in my case.
+But now we need some compatible java version.
 
 #### Which java to use?
 
@@ -81,9 +83,62 @@ sudo update-alternatives --install "/usr/bin/java" "java" "/opt/java/64/jre/bin/
 sudo update-alternatives --install "/usr/bin/javaws" "javaws" "/opt/java/64/jre/bin/javaws" 1
 sudo update-alternatives --set java /opt/java/64/jre/bin/java
 sudo update-alternatives --set javaws /opt/java/64/jre/bin/javaws
+
+java -version
+java version "1.8.0_441"
+Java(TM) SE Runtime Environment (build 1.8.0_441-b07)
+Java HotSpot(TM) 64-Bit Server VM (build 25.441-b07, mixed mode)
 ```
 
-Because of the outdated Certificates in CIMC we also have to think about a solution to overcome this obstacle.
-One solution I tried was to set the system time of the VM back to 2018 ... and it worked.
-After the first CIMC upgrade to version 3.x this won't be needed anymore, because then upgrades with USB Flash devices worked.
+### CIMC KVM Java Web Start Application
+
+Because of the outdated Certificates in CIMC, we also have to think about a solution to overcome this obstacle.
+
+When I tried to open the kvm.jlnp I got an exception:
+```
+sun.security.validator.ValidatorException: PKIX path validation failed: java.security.cert.CertPathValidatorException: denyAfter constraint check failed: SHA1 used with Constraint date: 2019-01-01; params date: 2025-04-06T11:35:24.198Z used with certificate: CN=DigiCert Assured ID Code Signing CA-1, OU=www.digicert.com, O=DigiCert Inc, C=US
+
+```
+This makes sense, because SHA1 is not secure anymore and it is dangerous to use it.
+But in this case it was not possible for me to find a workaround other than change the denyAfter date in the java.security settings.
+
+`sudo vim /opt/java/64/jre/lib/security/java.security` 
+
+```
+ 642 jdk.certpath.disabledAlgorithms=MD2, MD5, SHA1 jdkCA & usage TLSServer, \
+ 643     RSA keySize < 1024, DSA keySize < 1024, EC keySize < 224, \
+ 644     include jdk.disabled.namedCurves, \
+ 645     SHA1 usage SignedJAR & denyAfter 2019-01-01
+```
+
+Change the **denyAfter** date to today + 1 day.
+**!! this is dangerous and you should be aware what you are doing with this change. Do not do this on your workstations java settings! !!**
+
+When solved this issue, the next thing came up, because outdated certificates.
+By adding the CIMC url to the exceptions.sites file on my users java configuration it could get solved.
+
+```
+echo "https://<CIMCIP>/" > ~/.java/deployment/security/exception.sites
+```
+
+If the login still fails with timeout or wrong user/password warnings, double check the CIMC password!!
+After this handstand, it was possible to get into CIMC vKVM and mount the huu ISO on CIMC versions 2.x at C22 M3, C220/240 M4.
+
+## C22 M3
+I tend to disable secureboot in a homelab environment, but feel free to let it enabled it is on your opinion.
+But be aware, there are threads about this topic, because difficult to disable it can be, after a certain CIMC version.
+So check for secureboot in boot settings before you start with the upgrades, and decide what you would like to have.
+
+Lets start with the upgrades:
+In my case I started with CIMC version 2.0(13e)
+Release notes state to upgrade to 3.0(3a)
+DOwnloaded ucs-c2x-huu-3.0.3a.iso and mapped it via KVM to the server.
+Reboot
+Press F6 and choose Cico vKVM-Mapped vDVD1.22 to boot from to start Cisco UCS Host Upgrade Utility
+During the upgrade wizard it will ask you again if you want to enable Secure Boot.
+Be aware of that, because it is not possible to change this afterwards.
+Read the messages and then do ClickOPS.
+
+
+## C220 M4
 
